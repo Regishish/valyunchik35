@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 import os
 import logging
@@ -34,6 +35,7 @@ QUESTS = [
     {"text": "Время аперетива и обеда: выбери пиво/негрони/апероль/чай или воду и пришли мне фото бокала или селфи!"},
     {"text": "Выбери ресторан на вечер, где мы отпразднуем твоё 35-летие:\n1. Восточный квартал\n2. Плакучая Ива\n3. САНРЕМО\n4. Читта Маргарита\n5. Реззо"}
 ]
+
 user_states = {}
 current_questions = {}
 correct_answers = {
@@ -47,6 +49,7 @@ correct_answers = {
     8: "Все вместе",
     9: "Все вместе",
 }
+
 questions = {
     1: "Что мы делаем по твоему мнению слишком часто, а я всегда не против?",
     2: "Какой сериал ты не хотел смотреть, я тебя заставила, а потом ты каааак втянулся!",
@@ -70,18 +73,13 @@ async def start_game(message: types.Message):
 async def send_question(user_id, q_num):
     current_questions[user_id] = q_num
     q_text = questions[q_num]
-
     if q_num == 10:
         await bot.send_message(
             user_id,
             f"🧩 Вопрос 10:\n{q_text} (Открытый ответ)"
         )
     else:
-        options = [
-            answers[q_num]['correct'],
-            answers[q_num]['wrong1'],
-            answers[q_num]['wrong2'],
-        ]
+        options = [correct_answers[q_num], "Неверный 1", "Неверный 2"]
         markup = InlineKeyboardMarkup()
         for ans in set(options):
             markup.add(InlineKeyboardButton(ans, callback_data=f"answer_{ans}"))
@@ -91,8 +89,6 @@ async def send_question(user_id, q_num):
             f"🧩 Вопрос {q_num}:\n{q_text}",
             reply_markup=markup
         )
-    elif index == len(QUESTS):
-        await send_question(user_id, 1)
 
 @dp.callback_query_handler(lambda c: c.data == "quest_done")
 async def handle_quest_done(callback_query: types.CallbackQuery):
@@ -101,18 +97,6 @@ async def handle_quest_done(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
     await bot.send_message(user_id, "✅ Задание выполнено, ты молодец!")
     await send_next_quest(user_id)
-
-async def send_question(user_id, q_num):
-    current_questions[user_id] = q_num
-    q_text = questions[q_num]
-    if q_num == 10:
-        await bot.send_message(user_id, f"🧩 Вопрос 10:\n{q_text} (Открытый ответ)")
-    else:
-        options = [...]
-        markup = InlineKeyboardMarkup()
-        for ans in set(options):
-            markup.add(InlineKeyboardButton(ans, callback_data=f"answer_{ans}"))
-        await bot.send_message(user_id, f"🧩 Вопрос {q_num}:\n{q_text}", reply_markup=markup)
 
 @dp.callback_query_handler(lambda c: c.data.startswith("answer_"))
 async def handle_answer(callback_query: types.CallbackQuery):
@@ -124,9 +108,7 @@ async def handle_answer(callback_query: types.CallbackQuery):
         await bot.answer_callback_query(callback_query.id, text="✅ Правильно!")
         if q_num == 10:
             await bot.send_message(user_id, "🎉 Поздравляю, ты прошёл опрос! Ты почти у цели… Скоро тебя ждёт кое-что очень приятное 🎁❤️")
-            await bot.send_message(user_id, """🕘 Финальное задание:
-Обними жену и получи подарок 🎁
-Ты прошёл игру!""")
+            await bot.send_message(user_id, "🕘 Финальное задание:\nОбними жену и получи подарок 🎁\nТы прошёл игру!")
         else:
             await send_question(user_id, q_num + 1)
     else:
