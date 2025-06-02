@@ -30,7 +30,7 @@ photos_with_captions = [
 
 async def scheduled_messages():
     for user_id in USER_IDS:
-        await bot.send_message(user_id, "🌅 Доброе утро! Сегодня ты в игре. Жди задания и комплименты весь день ❤️")
+        await bot.send_message(user_id, "🌅 Доброе утро! Сегодня ты в игре. С тебя - хорошее настроение и выполнение заданий, а с меня- сюрприз! ❤️")
         for i, (photo, caption) in enumerate(photos_with_captions):
             await asyncio.sleep(3600 if i > 0 else 10)
             with open(f"media/{photo}", "rb") as img:
