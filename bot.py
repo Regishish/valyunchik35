@@ -1,143 +1,142 @@
+# -*- coding: utf-8 -*-
+import os
 import logging
 import asyncio
-import os
 from aiogram import Bot, Dispatcher, types
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InputFile, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils import executor
+from datetime import datetime, timedelta
 
-API_TOKEN = os.getenv("API_TOKEN")
+API_TOKEN = os.getenv("BOT_TOKEN")
 USER_IDS = [int(uid) for uid in os.getenv("USER_IDS", "").split(",")]
 
-bot = Bot(token=API_TOKEN, parse_mode=types.ParseMode.HTML)
-dp = Dispatcher(bot)
 logging.basicConfig(level=logging.INFO)
+bot = Bot(token=API_TOKEN)
+dp = Dispatcher(bot)
 
+# === Фото-комплименты ===
 photos_with_captions = [
-    ("IMG_9126.jpeg", "☀️ Когда ты держишь мою руку — мне спокойно."),
-    ("IMG_9111.jpeg", "Ты — мой дом."),
-    ("IMG_4979.jpeg", "Ты- самый лучший. Помни об этом всегда!"),
-    ("IMG_5377.jpeg", "Ты самый умный мужчина из всех, кого я знаю."),
-    ("IMG_5390.jpeg", "Ты - моя опора."),
-    ("IMG_5863.jpeg", "Люблю, когда ты смотришь так, как на этом фото."),
-    ("IMG_6353.jpeg", "Ты умеешь быть разным — и я люблю каждое твое состояние."),
-    ("IMG_7087.jpeg", "У нас с тобой все получится!"),
-    ("IMG_7761.jpeg", "С тобой даже самые будничные дни — как праздник."),
-    ("2B7E2B03.jpeg", "Ты умеешь быть настоящим. И это бесценно."),
-    ("B31FB0E2.jpeg", "Я люблю нас. Особенно — в такие моменты."),
-    ("TXD5wkJc.jpeg", "Ты — мой самый лучший человек на свете."),
+    ("2025-06-02 22.32.51.jpg", "☀️ Когда ты держишь мою руку — мне спокойно."),
+    ("2025-06-02 22.33.06.jpg", "Ты — мой дом."),
+    ("2025-06-02 22.33.13.jpg", "Ты- самый лучший. Помни об этом всегда!"),
+    ("2025-06-02 22.33.19.jpg", "Ты самый умный мужчина из всех, кого я знаю."),
+    ("2025-06-02 22.33.25.jpg", "Ты - моя опора."),
+    ("2025-06-02 22.33.31.jpg", "Люблю, когда ты смотришь так, как на этом фото."),
+    ("2B7E2B03-87C5-4EB1-B46F-093EA26054E1.jpeg", "Ты умеешь быть разным — и я люблю каждое твое состояние."),
+    ("B31FB0E2-40C1-4970-9B80-807699C9ADEA.jpeg", "У нас с тобой все получится!"),
 ]
 
-tasks = [
-    ("🎯 Первое задание: сфотографируй завтрак и отправь его сюда.", "✅ Завтрак — залог отличного дня! Молодец!"),
-    ("📞 Позвони маме и поздравь её с днем рождения тебя 😊", "✅ Супер! Мамы — это святое ❤️"),
-    ("🌊 Зайди в море один раз и пришли фото/видео!", "✅ Герой! Сила воды — с тобой!"),
-    ("🍴 Выбери ресторан на вечер (пришли 3 варианта)", "✅ Шеф, вы сделали вкусный выбор 😋"),
-    ("🧥 Оденься красиво для вечера. Жду селфи!", "✅ Красавчик! Ты сразишь всех 😍"),
-    ("💬 Пока ждёшь жену, пройди тест — будет весело!", "✅ Ну ты знаток! Респект 👏"),
-    ("🍷 Выпей аперитив и сфоткай бокал", "✅ Пусть вечер будет таким же ярким, как ты!"),
-    ("🥂 Ужин с женой — сделай фото на память", "✅ Вы идеальная пара!"),
-    ("🍾 Возьми просекко/вино и вернись в номер", "✅ Осталось чуть-чуть до подарка..."),
-    ("🎁 Найди подарок: он под 'штукой, которая у нас была всякая разная, даже на половину кровати'", "🥳 Нашёл! С днём рождения, любимый 💖"),
-]
+QUESTS = [
+    {"text": "Задание 1: Позавтракать вкусно. Сфоткай свой завтрак — я проверю 😊"},
+    {"text": "Теперь позвони своей маме и поздравь ее с тем, что у нее такой прекрасный сын! 😊"},
+    {"text": "Теперь задуть свечу  и загадать желание 🎂"},
+    {"text": "Фото из моря или бассейна 🌊 Лицо — безумно счастливое!"},
+    {"text": "Пора выпить: пиво, негрони, чай или воду — выбор за тобой. С тебя селфи!"},
+    {"text": "Выбери ресторан на вечер, где мы отпразднуем твоё 35-летие:
 
-quiz_questions = [
-    ("Какой сериал ты никогда не хочешь смотреть?", ["Игра престолов", "Клюквенный щербет", "Во все тяжкие"]),
-    ("Кто поёт твою любимую песню?", ["Rihanna", "Zivert", "Dua Lipa"]),
-    ("Что я чаще всего говорю по утрам?", ["Доброе утро, котик", "Где мои тапки?", "Сварил кофе?"]),
+1. Восточный квартал
+2. СанРемо
+3. Плакучая Ива
+4. Чита-Маргарита
+5. Реззо
+6. Свой вариант"},
 ]
 
 user_states = {}
+current_questions = {}
+correct_answers = {
+    1: "Путешествуем",
+    2: "Игра престолов",
+    3: "Не трогай меня",
+    4: "В зале в углу",
+    5: "Всё зависит от случая",
+    6: "Турецкие сериалы",
+    7: "За всё это вместе",
+    8: "Все вместе",
+    9: "Все вместе",
+}
+questions = {
+    1: "Что мы делаем по твоему мнению слишком часто, а я всегда не против?",
+    2: "Какой сериал ты не хотел смотреть, я тебя заставила, а потом ты каааак втянулся!",
+    3: "Что ты чаще всего говоришь утром?",
+    4: "Где чаще всего оказываются твои носки?",
+    5: "Кто просыпается раньше?",
+    6: "Что любит твоя жена, а ты не очень?",
+    7: "За что твоя жена тебя больше всего любит?",
+    8: "Твоя суперспособность — это:",
+    9: "Чем ты гордишься в себе больше всего?",
+    10: "Куда мы точно никогда не поедем в отпуск?",
+}
 
-@dp.message_handler(commands=["start", "go"])
-async def send_welcome(message: types.Message):
+@dp.message_handler(commands=['start'])
+async def start_game(message: types.Message):
     if message.from_user.id in USER_IDS:
-        markup = InlineKeyboardMarkup().add(
-            InlineKeyboardButton("Начать игру", callback_data="start_game")
-        )
-        user_states[message.from_user.id] = {"task": 0, "in_quiz": False}
-        await message.answer("🎉 Привет! Готов начать день с сюрпризами?", reply_markup=markup)
+        user_states[message.from_user.id] = 0
+        await message.answer("🎉 Поздравляю, ты в игре! Сегодня тебя ждёт несколько заданий, а в конце — подарочек.")
+        await send_next_quest(message.from_user.id)
 
-@dp.callback_query_handler(lambda c: c.data == "start_game")
-async def start_game(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id)
+async def send_next_quest(user_id):
+    index = user_states.get(user_id, 0)
+    if index < len(QUESTS):
+        quest = QUESTS[index]
+        markup = InlineKeyboardMarkup().add(InlineKeyboardButton("Готово ✅", callback_data="quest_done"))
+        await bot.send_message(user_id, quest["text"], reply_markup=markup)
+    elif index == len(QUESTS):
+        await send_question(user_id, 1)
+
+@dp.callback_query_handler(lambda c: c.data == "quest_done")
+async def handle_quest_done(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
-    await send_task(user_id)
+    user_states[user_id] += 1
+    await bot.answer_callback_query(callback_query.id)
+    await bot.send_message(user_id, "✅ Задание выполнено, ты молодец!")
+    await send_next_quest(user_id)
 
-@dp.message_handler(content_types=types.ContentType.PHOTO)
-async def handle_photo(message: types.Message):
-    user_id = message.from_user.id
-    state = user_states.get(user_id, {})
-    task_idx = state.get("task", 0)
-
-    if task_idx < len(tasks):
-        await message.reply(tasks[task_idx][1])  # похвала
-        user_states[user_id]["task"] += 1
-        await send_task(user_id)
+async def send_question(user_id, q_num):
+    current_questions[user_id] = q_num
+    q_text = questions[q_num]
+    if q_num == 10:
+        await bot.send_message(user_id, f"🧩 Вопрос 10:
+{q_text} (Открытый ответ)")
     else:
-        await message.reply("🎉 Ты выполнил все задания! Проверь, не ждёт ли тебя где-то подарок 😉")
+        options = [ans for ans in ["Путешествуем", "Едим", "Спим", "Ну ты сам знаешь что…", "Игра престолов", "Зимородок", "Оленёнок", "Отчаянные домохозяйки", "Не трогай меня", "Доброе утро, любимая", "Сколько время?", "Я уже сделал кофе", "В зале в углу", "В бельевом ящике", "На сушилке", "Ты что, я их всегда убираю", "Ты", "Я", "Оба одновременно", "Пляжный отдых", "Завтрак в ресторане", "Пешие прогулки", "За заботу", "За чувство юмора", "За доброту", "Видеть хаос и оставаться спокойным", "Быть мужчиной мечты", "Быстро находить, где вкусно поесть", "Занимать всю кровать", "Все вместе", "Умом", "Спокойствием", "Силой", "За всё это вместе", "Турецкие сериалы", "Всё зависит от случая"] if ans]
+        markup = InlineKeyboardMarkup()
+        for ans in set(options):
+            markup.add(InlineKeyboardButton(ans, callback_data=f"answer_{ans}"))
+        await bot.send_message(user_id, f"🧩 Вопрос {q_num}:
+{q_text}", reply_markup=markup)
 
-@dp.message_handler()
-async def handle_text(message: types.Message):
-    user_id = message.from_user.id
-    state = user_states.get(user_id, {})
-
-    if state.get("in_quiz"):
-        current_q = state.get("quiz_q", 0)
-        if current_q < len(quiz_questions) - 1:
-            user_states[user_id]["quiz_q"] += 1
-            await send_quiz_question(user_id)
+@dp.callback_query_handler(lambda c: c.data.startswith("answer_"))
+async def handle_answer(callback_query: types.CallbackQuery):
+    user_id = callback_query.from_user.id
+    answer = callback_query.data[len("answer_"):]
+    q_num = current_questions.get(user_id, 1)
+    correct = correct_answers.get(q_num, "")
+    if answer == correct:
+        await bot.answer_callback_query(callback_query.id, text="✅ Правильно!")
+        if q_num == 10:
+            await bot.send_message(user_id, "🎉 Поздравляю, ты прошёл опрос! Ты почти у цели… Скоро тебя ждёт кое-что очень приятное 🎁❤️")
+            await bot.send_message(user_id, "🕘 Финальное задание:
+Обними свою красивую жену и получи свой подарок 🎁")
         else:
-            state["in_quiz"] = False
-            await bot.send_message(user_id, "🧠 Поздравляю, ты почти у цели! Готов к последнему заданию?")
-            await send_task(user_id)
-
-async def send_task(user_id):
-    state = user_states[user_id]
-    task_idx = state.get("task", 0)
-
-    if task_idx == 5:
-        state["in_quiz"] = True
-        state["quiz_q"] = 0
-        await send_quiz_question(user_id)
-        return
-
-    if task_idx < len(tasks):
-        text = tasks[task_idx][0]
-        markup = InlineKeyboardMarkup().add(InlineKeyboardButton("Готово ✅", callback_data="done"))
-        await bot.send_message(user_id, text, reply_markup=markup)
+            await send_question(user_id, q_num + 1)
     else:
-        await bot.send_message(user_id, "🎉 Все задания выполнены. Ты молодец! Осталось только найти подарок 😉")
+        await bot.answer_callback_query(callback_query.id, text="❌ Неверно. Попробуй ещё раз!")
 
-@dp.callback_query_handler(lambda c: c.data == "done")
-async def handle_done(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id)
-    await callback_query.message.reply("👌 Жду фото/подтверждение!")
-
-async def send_quiz_question(user_id):
-    state = user_states[user_id]
-    q_idx = state["quiz_q"]
-    q, options = quiz_questions[q_idx]
-    markup = InlineKeyboardMarkup()
-    for opt in options:
-        markup.add(InlineKeyboardButton(opt, callback_data="quiz_ans"))
-    await bot.send_message(user_id, f"🧠 Вопрос: {q}", reply_markup=markup)
-
-@dp.callback_query_handler(lambda c: c.data == "quiz_ans")
-async def handle_quiz_answer(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(callback_query.id)
-    await callback_query.message.reply("✅ Ответ записан!")
-    await handle_text(callback_query.message)
-
-async def scheduled_messages():
-    for user_id in USER_IDS:
-        await bot.send_message(user_id, "🌅 Доброе утро! Сегодня ты в игре. С тебя — настроение и задания, с меня — сюрприз ❤️")
-        for i, (photo, caption) in enumerate(photos_with_captions):
-            await asyncio.sleep(3600 if i > 0 else 10)
-            with open(f"media/{photo}", "rb") as img:
-                await bot.send_photo(user_id, img, caption=caption)
-
-async def on_startup(dp):
-    asyncio.create_task(scheduled_messages())
+async def send_hourly_compliments():
+    while True:
+        now = datetime.now()
+        if 9 <= now.hour <= 21:
+            index = (now.hour - 9) % len(photos_with_captions)
+            for user_id in USER_IDS:
+                photo, caption = photos_with_captions[index]
+                try:
+                    await bot.send_photo(chat_id=user_id, photo=InputFile(photo), caption=caption)
+                except Exception as e:
+                    logging.error(f"Ошибка при отправке фото: {e}")
+        await asyncio.sleep(3600)
 
 if __name__ == "__main__":
-    executor.start_polling(dp, on_startup=on_startup)
+    loop = asyncio.get_event_loop()
+    loop.create_task(send_hourly_compliments())
+    executor.start_polling(dp, skip_updates=True)
