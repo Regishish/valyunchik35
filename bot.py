@@ -124,8 +124,9 @@ async def handle_answer(callback_query: types.CallbackQuery):
         await bot.answer_callback_query(callback_query.id, text="✅ Правильно!")
         if q_num == 10:
             await bot.send_message(user_id, "🎉 Поздравляю, ты прошёл опрос! Ты почти у цели… Скоро тебя ждёт кое-что очень приятное 🎁❤️")
-            await bot.send_message(user_id, "🕘 Финальное задание:
-Обними свою красивую жену и получи свой подарок 🎁")
+            await bot.send_message(user_id, """🕘 Финальное задание:
+Обними жену и получи подарок 🎁
+Ты прошёл игру!""")
         else:
             await send_question(user_id, q_num + 1)
     else:
