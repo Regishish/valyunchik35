@@ -7,7 +7,7 @@ from aiogram.types import InputFile, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils import executor
 from datetime import datetime, timedelta
 
-API_TOKEN = os.getenv("BOT_TOKEN")
+API_TOKEN = os.getenv("API_TOKEN")
 USER_IDS = [int(uid) for uid in os.getenv("USER_IDS", "").split(",")]
 
 logging.basicConfig(level=logging.INFO)
