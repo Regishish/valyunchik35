@@ -67,12 +67,30 @@ async def start_game(message: types.Message):
         await message.answer("🎉 Поздравляю, ты в игре! Сегодня тебя ждёт несколько заданий, а в конце — подарочек.")
         await send_next_quest(message.from_user.id)
 
-async def send_next_quest(user_id):
-    index = user_states.get(user_id, 0)
-    if index < len(QUESTS):
-        quest = QUESTS[index]
-        markup = InlineKeyboardMarkup().add(InlineKeyboardButton("Готово ✅", callback_data="quest_done"))
-        await bot.send_message(user_id, quest["text"], reply_markup=markup)
+async def send_question(user_id, q_num):
+    current_questions[user_id] = q_num
+    q_text = questions[q_num]
+
+    if q_num == 10:
+        await bot.send_message(
+            user_id,
+            f"🧩 Вопрос 10:\n{q_text} (Открытый ответ)"
+        )
+    else:
+        options = [
+            answers[q_num]['correct'],
+            answers[q_num]['wrong1'],
+            answers[q_num]['wrong2'],
+        ]
+        markup = InlineKeyboardMarkup()
+        for ans in set(options):
+            markup.add(InlineKeyboardButton(ans, callback_data=f"answer_{ans}"))
+
+        await bot.send_message(
+            user_id,
+            f"🧩 Вопрос {q_num}:\n{q_text}",
+            reply_markup=markup
+        )
     elif index == len(QUESTS):
         await send_question(user_id, 1)
 
