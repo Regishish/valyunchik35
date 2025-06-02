@@ -69,6 +69,17 @@ async def start_game(message: types.Message):
         user_states[message.from_user.id] = 0
         await message.answer("🎉 Поздравляю, ты в игре! Сегодня тебя ждёт несколько заданий, а в конце — подарочек.")
         await send_next_quest(message.from_user.id)
+async def send_next_quest(user_id):
+    index = user_states.get(user_id, 0)
+    if index < len(QUESTS):
+        quest_text = QUESTS[index]["text"]
+        markup = InlineKeyboardMarkup().add(
+            InlineKeyboardButton("Готово ✅", callback_data="quest_done")
+        )
+        await bot.send_message(user_id, quest_text, reply_markup=markup)
+    elif index == len(QUESTS):
+        await bot.send_message(user_id, "🎯 Отлично, ты прошёл все задания!\nТеперь немного поиграем 😉")
+        await send_question(user_id, 1)
 
 async def send_question(user_id, q_num):
     current_questions[user_id] = q_num
