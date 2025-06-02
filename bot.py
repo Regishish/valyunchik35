@@ -94,8 +94,7 @@ async def send_question(user_id, q_num):
         markup = InlineKeyboardMarkup()
         for ans in set(options):
             markup.add(InlineKeyboardButton(ans, callback_data=f"answer_{ans}"))
-        await bot.send_message(user_id, f"🧩 Вопрос {q_num}:
-{q_text}", reply_markup=markup)
+        await bot.send_message(user_id, f"🧩 Вопрос {q_num}:{q_text}", reply_markup=markup)
 
 @dp.callback_query_handler(lambda c: c.data.startswith("answer_"))
 async def handle_answer(callback_query: types.CallbackQuery):
