@@ -308,7 +308,7 @@ async def handle_quiz_answer(callback_query: types.CallbackQuery):
 
         question = questions[q_idx]
 
-       if selected in question["options"]:
+if selected in question["options"]:
     is_correct, comment = question["options"][selected]
     await callback_query.answer()
     await bot.send_message(user_id, comment)
