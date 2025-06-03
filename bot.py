@@ -261,84 +261,69 @@ questions = [
 quiz_progress = {}
 
 async def send_quiz_sequence(user_id):
-q_idx = quiz_progress.get(user_id, 0)
-if q_idx < len(questions):
-    q = questions[q_idx]
-    markup = InlineKeyboardMarkup()
-    for option in q["options"].keys():
-        markup.add(InlineKeyboardButton(option, callback_data=f"quiz_{q_idx}_{option}"))
-    await bot.send_message(user_id, q["text"], reply_markup=markup)
+    q_idx = quiz_progress.get(user_id, 0)
+    if q_idx < len(questions):
+        q = questions[q_idx]
+        markup = InlineKeyboardMarkup()
+        for option in q["options"].keys():
+            markup.add(InlineKeyboardButton(option, callback_data=f"quiz_{q_idx}_{option}"))
+        await bot.send_message(user_id, q["text"], reply_markup=markup)
 
 @dp.callback_query_handler(lambda c: c.data.startswith("quiz_"))
 async def handle_quiz_answer(callback_query: types.CallbackQuery):
-user_id = callback_query.from_user.id
-parts = callback_query.data.split("_", 2)
-if len(parts) < 3:
-    await callback_query.answer("🤔 Неизвестный ответ")
-    return
+    user_id = callback_query.from_user.id
+    parts = callback_query.data.split("_", 2)
+    if len(parts) < 3:
+        await callback_query.answer("🤔 Неизвестный ответ")
+        return
 
-q_idx_str, selected = parts[1], parts[2]
-try:
-    q_idx = int(q_idx_str)
-except ValueError:
-    await callback_query.answer("🤔 Неизвестный ответ")
-    return
+    q_idx_str, selected = parts[1], parts[2]
+    try:
+        q_idx = int(q_idx_str)
+    except ValueError:
+        await callback_query.answer("🤔 Неизвестный ответ")
+        return
 
-if q_idx >= len(questions):
-    await callback_query.answer("🧠 Викторина уже завершена.")
-    return
+    if q_idx >= len(questions):
+        await callback_query.answer("🧠 Викторина уже завершена.")
+        return
 
-question = questions[q_idx]
-if selected in question["options"]:
-    is_correct, comment = question["options"][selected]
-    await callback_query.answer()  # убираем всплывающий текст
-    await bot.send_message(user_id, comment)  # добавляем сообщение с комментарием
-    if is_correct:
-        quiz_progress[user_id] = q_idx + 1
-        await asyncio.sleep(1)
-        if quiz_progress[user_id] < len(questions):
-            await send_quiz_sequence(user_id)
-        else:
-            await bot.send_message(user_id, "🎉 Ты прошёл все вопросы! 🎁")
-            user_states[user_id] += 1
-            await send_next_quest(user_id)
-else:
-    await callback_query.answer("🤔 Неизвестный ответ")
+    if quiz_progress.get(user_id, 0) > q_idx:
+        await callback_query.answer("🔁 Этот вопрос уже пройден")
+        return
 
-if q_idx >= len(questions):
-    await bot.answer_callback_query(callback_query.id, text="🧠 Викторина уже завершена.")
-    return
-
-question = questions[q_idx]
-is_correct, comment = question["options"].get(selected, (False, "🤔 Неизвестный ответ"))
-await bot.answer_callback_query(callback_query.id, text=comment)
-
-if is_correct:
-    quiz_progress[user_id] = q_idx + 1
-
-    if quiz_progress[user_id] < len(questions):
-        await send_quiz_sequence(user_id)
+    question = questions[q_idx]
+    if selected in question["options"]:
+        is_correct, comment = question["options"][selected]
+        await callback_query.answer()
+        await bot.send_message(user_id, comment)
+        if is_correct:
+            quiz_progress[user_id] = q_idx + 1
+            await asyncio.sleep(1)
+            if quiz_progress[user_id] < len(questions):
+                await send_quiz_sequence(user_id)
+            else:
+                await bot.send_message(user_id, "🎉 Ты прошёл все вопросы! 🎁")
+                user_states[user_id] += 1
+                await send_next_quest(user_id)
     else:
-        await bot.send_message(user_id, "🎉 Ты прошёл все вопросы! 🎁")
-        await asyncio.sleep(1)
-        user_states[user_id] += 1
-        await send_next_quest(user_id)
+        await callback_query.answer("🤔 Неизвестный ответ")
 
 async def send_hourly_compliments():
-while True:
-    now = datetime.now()
-    if 9 <= now.hour <= 21:
-        index = (now.hour - 9) % len(photos_with_captions)
-        for user_id in USER_IDS:
-            photo, caption = photos_with_captions[index]
-            try:
-                await bot.send_photo(chat_id=user_id, photo=InputFile(photo), caption=caption)
-            except Exception as e:
-                logging.error(f"Ошибка при отправке фото: {e}")
-    await asyncio.sleep(3600)
+    while True:
+        now = datetime.now()
+        if 9 <= now.hour <= 21:
+            index = (now.hour - 9) % len(photos_with_captions)
+            for user_id in USER_IDS:
+                photo, caption = photos_with_captions[index]
+                try:
+                    await bot.send_photo(chat_id=user_id, photo=InputFile(photo), caption=caption)
+                except Exception as e:
+                    logging.error(f"Ошибка при отправке фото: {e}")
+        await asyncio.sleep(3600)
 
 async def on_startup(dp):
-asyncio.create_task(send_hourly_compliments())
+    asyncio.create_task(send_hourly_compliments())
 
 if __name__ == "__main__":
-executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
+    executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
