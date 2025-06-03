@@ -183,16 +183,6 @@ async def handle_ready(callback_query: CallbackQuery):
     user_states[user_id] += 1
     await send_next_quest(user_id)
 
-
-    else:
-        await bot.send_message(user_id, "🎉 Всё выполнено! Поздравляю! 🎈")
-
-    if index < len(compliments):
-        await bot.send_message(user_id, compliments[index])
-
-    user_states[user_id] += 1
-    await send_next_quest(user_id)
-
 async def send_quiz_sequence(user_id):
     q_idx = quiz_progress.get(user_id, 0)
     if q_idx < len(questions):
@@ -258,6 +248,30 @@ async def handle_quiz_answer(callback_query: types.CallbackQuery):
                     await bot.send_photo(chat_id=user_id, photo=InputFile(photo), caption=caption)
                 except Exception as e:
                     logging.error(f"Ошибка при отправке фото: {e}")
+        await asyncio.sleep(3600)
+# ← вставить здесь (примерно строка 263)
+async def send_hourly_compliments():
+    from datetime import datetime
+    import asyncio
+    import logging
+    from aiogram.types import InputFile
+
+    while True:
+        now = datetime.now()
+        if 9 <= now.hour <= 21:
+            index = (now.hour - 9) % len(photos_with_captions)
+            photo, caption = photos_with_captions[index]
+
+            for user_id in USER_IDS:
+                try:
+                    await bot.send_photo(
+                        chat_id=user_id,
+                        photo=InputFile(photo),
+                        caption=caption
+                    )
+                except Exception as e:
+                    logging.error(f"❌ Ошибка при отправке фото пользователю {user_id}: {e}")
+
         await asyncio.sleep(3600)
 
 async def on_startup(dp):
