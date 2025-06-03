@@ -264,4 +264,5 @@ async def on_startup(dp):
     asyncio.create_task(send_hourly_compliments())
 
 if __name__ == "__main__":
+    print("👋 Бот стартует...")  # DEBUG
     executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
