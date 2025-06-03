@@ -74,7 +74,7 @@ async def handle_user_response(message: types.Message):
     "🍽️ Я за любой твой выбор, особенно если мы идём туда вместе ❤️"
 ]
 
-  @dp.message_handler(content_types=types.ContentType.ANY)
+@dp.message_handler(content_types=types.ContentType.ANY)
 async def handle_user_response(message: types.Message):
     if message.from_user.id in USER_IDS:
         state = user_states.get(message.from_user.id, 0)
