@@ -50,10 +50,13 @@ async def send_next_quest(user_id):
     index = user_states.get(user_id, 0)
     if index < len(QUESTS):
         quest_text = QUESTS[index]["text"]
-        markup = types.ForceReply(selective=True)
-        await bot.send_message(user_id, quest_text + "\nПришли фото или ответ сюда ⬇️", reply_markup=markup)
-    elif index == len(QUESTS):
-        await bot.send_message(user_id, "🎯  Теперь — мини-викторина 😊")
+        markup = types.InlineKeyboardMarkup().add(
+            types.InlineKeyboardButton("✅ Готово", callback_data="task_done")
+        )
+        await bot.send_message(user_id, quest_text, reply_markup=markup)
+    elif index == len(QUESTS):  # после последнего квеста
+        await bot.send_message(user_id, "🎯 Теперь — мини-викторина 😊")
+        quiz_progress[user_id] = 0  # <--- обязательно инициализируем индекс!
         await send_quiz_sequence(user_id)
 
 @dp.message_handler(content_types=types.ContentType.ANY)
