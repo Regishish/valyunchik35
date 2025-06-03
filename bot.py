@@ -296,7 +296,7 @@ async def handle_quiz_answer(callback_query: types.CallbackQuery):
             await callback_query.answer("🤔 Неизвестный ответ")
             return
 
-       q_idx_str, selected = parts[1], parts[2]
+    q_idx_str, selected = parts[1], parts[2]
 try:
     q_idx = int(q_idx_str)
 except ValueError:
