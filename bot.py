@@ -260,6 +260,7 @@ async def handle_ready(callback_query: CallbackQuery):
         await bot.send_message(user_id, "🎉 Всё выполнено! Поздравляю! 🎈")
         await handle_quiz_completion(user_id)
 
+
     else:
         await callback_query.answer("🤔 Неизвестный ответ")
 
