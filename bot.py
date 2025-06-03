@@ -153,7 +153,7 @@ async def some_func(message: types.Message):
     await send_next_quest(user_id)
 
 async def send_next_quest(user_id):
-index = user_states.get(user_id, 0)
+    index = user_states.get(user_id, 0)
 
 if index < len(QUESTS):
     quest_text = QUESTS[index]["text"]
