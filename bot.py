@@ -249,9 +249,9 @@ async def handle_quiz_answer(callback_query: types.CallbackQuery):
         processing_users.remove(user_id)
 
 
-async def send_hourly_compliments():
-while True:
-    now = datetime.now()
+async def main():
+    while True:
+        await asyncio.sleep(1)
     if 9 <= now.hour <= 21:
         index = (now.hour - 9) % len(photos_with_captions)
         for user_id in USER_IDS:
