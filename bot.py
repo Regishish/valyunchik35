@@ -221,10 +221,10 @@ async def handle_ready(callback_query: CallbackQuery):
     await callback_query.answer("✅ Задание отмечено как выполненное!")
 
     if index < len(compliments):
-    await bot.send_message(user_id, compliments[index])
+        await bot.send_message(user_id, compliments[index])
 
 user_states[user_id] += 1
-await send_next_quest(user_id)
+    await send_next_quest(user_id)
 
 try:
     _, q_idx_str, selected = parts
@@ -232,6 +232,11 @@ try:
 except ValueError:
     await callback_query.answer("🤔 Неизвестный ответ")
     return
+
+if q_idx >= len(questions):
+    await callback_query.answer("🧠 Викторина уже завершена.")
+    return
+
 
 if q_idx >= len(questions):
     await callback_query.answer("🧠 Викторина уже завершена.")
