@@ -125,8 +125,7 @@ async def handle_quiz_answer(callback_query: types.CallbackQuery):
     parts = callback_query.data.split("|||", 2)
 
 if len(parts) < 3:
- else:
-    comment = question['options'].get(selected, (False, "🤔 Неизвестный ответ"))[1]
+    comment = "🤔 Неизвестный ответ"
     await callback_query.answer()
     await bot.send_message(user_id, f"❌ Нет, не так! {comment}")
     return
