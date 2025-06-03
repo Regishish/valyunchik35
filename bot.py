@@ -51,13 +51,12 @@ async def start_game(message: types.Message):
 async def send_next_quest(user_id):
     index = user_states.get(user_id, 0)
     if index < len(QUESTS):
-        quest_text = QUESTS[index]["text"]
-        markup = types.InlineKeyboardMarkup().add(
-        markup = types.InlineKeyboardMarkup()
-        markup.add(types.InlineKeyboardButton("Готово ✅", callback_data="ready"))
-        await bot.send_message(user_id, "📸 Сделал задание? Жми «Готово», если всё выполнено!", reply_markup=markup)
-        )
-        await bot.send_message(user_id, quest_text, reply_markup=markup)
+    markup = types.InlineKeyboardMarkup()
+markup.add(types.InlineKeyboardButton("Готово ✅", callback_data="ready"))
+await bot.send_message(user_id, "📸 Сделал задание? Жми «Готово», если всё выполнено!", reply_markup=markup)
+
+
+    await bot.send_message(user_id, quest_text, reply_markup=markup)
     elif index == len(QUESTS):  # после последнего квеста
         await bot.send_message(user_id, "🎯 Теперь — мини-викторина 😊")
         quiz_progress[user_id] = 0  # <--- обязательно инициализируем индекс!
