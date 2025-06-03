@@ -173,7 +173,7 @@ else:
 
 @dp.callback_query_handler(lambda c: c.data == "ready")
 async def handle_ready(callback_query: CallbackQuery):
-user_id = callback_query.from_user.id
+    user_id = callback_query.from_user.id
 index = user_states.get(user_id, 0)
 
 await callback_query.answer("✅ Задание отмечено как выполненное!")
