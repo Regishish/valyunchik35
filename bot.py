@@ -148,7 +148,7 @@ async def some_func(message: types.Message):
         await message.answer("✅ Принято!")
     user_id = message.from_user.id
     user_states[user_id] = 0
-        quiz_progress[user_id] = 0
+    quiz_progress[user_id] = 0
     await message.answer("🎉 Поздравляю, ты в игре! Сегодня тебя ждёт несколько заданий, а в конце — подарочек.")
     await send_next_quest(user_id)
 
