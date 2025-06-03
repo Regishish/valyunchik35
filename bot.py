@@ -251,16 +251,15 @@ async def handle_ready(callback_query: CallbackQuery):
         await bot.send_message(user_id, comment)
 
         if is_correct:
-            quiz_progress[user_id] = q_idx + 1
-            await asyncio.sleep(1)
-            if quiz_progress[user_id] < len(questions):
-                await send_quiz_sequence(user_id)
-            else:
-                await bot.send_message(user_id, "🎉 Ты прошёл все вопросы! 🎁")
-                user_states[user_id] += 1
-                await send_next_quest(user_id)
-        else:
-            await bot.send_message(user_id, "❌ Нет, не так! Попробуй ещё раз.")
+    quiz_progress[user_id] = q_idx + 1
+    await asyncio.sleep(1)
+    if quiz_progress[user_id] < len(questions):
+        await send_quiz_sequence(user_id)
+    else:
+        await bot.send_message(user_id, "🎉 Всё выполнено! Поздравляю! 🎈")
+        await handle_quiz_completion(user_id)
+# ⛔️ else убираем, так как сообщение уже отправлено выше как `comment`
+
     else:
         await callback_query.answer("🤔 Неизвестный ответ")
 
@@ -316,16 +315,16 @@ async def handle_quiz_answer(callback_query: types.CallbackQuery):
             await callback_query.answer()
             await bot.send_message(user_id, comment)
 
-            if is_correct:
-                quiz_progress[user_id] = q_idx + 1
-                await asyncio.sleep(1)
-                if quiz_progress[user_id] < len(questions):
-                    await send_quiz_sequence(user_id)
-                else:
-                    await bot.send_message(user_id, "🎉 Всё выполнено! Поздравляю! 🎈")
-                    await handle_quiz_completion(user_id)
-            else:
-                await bot.send_message(user_id, "❌ Нет, не так! Попробуй ещё раз.")
+           if is_correct:
+    quiz_progress[user_id] = q_idx + 1
+    await asyncio.sleep(1)
+    if quiz_progress[user_id] < len(questions):
+        await send_quiz_sequence(user_id)
+    else:
+        await bot.send_message(user_id, "🎉 Всё выполнено! Поздравляю! 🎈")
+        await handle_quiz_completion(user_id)
+# ⛔️ else убираем, так как сообщение уже отправлено выше как `comment`
+
         else:
             await callback_query.answer("🤔 Неизвестный ответ")
     
