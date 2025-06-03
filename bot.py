@@ -334,7 +334,7 @@ except KeyError:
 
         else:
             await callback_query.answer("🤔 Неизвестный ответ")
-    
+
     finally:
         processing_users.remove(user_id)  # 👈 Ставится ВНЕ всех условий, в конце try
 
@@ -358,3 +358,4 @@ async def on_startup(dp):
 
 if __name__ == "__main__":
     executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
+    
