@@ -255,11 +255,12 @@ async def handle_ready(callback_query: CallbackQuery):
     quiz_progress[user_id] = q_idx + 1
     await asyncio.sleep(1)
     if quiz_progress[user_id] < len(questions):
+        print(f"➡ Переход к вопросу {quiz_progress[user_id]}")
         await send_quiz_sequence(user_id)
     else:
+        print("🎉 Все вопросы пройдены — финал")
         await bot.send_message(user_id, "🎉 Всё выполнено! Поздравляю! 🎈")
         await handle_quiz_completion(user_id)
-# ⛔️ else убираем, так как сообщение уже отправлено выше как `comment`
 
     else:
         await callback_query.answer("🤔 Неизвестный ответ")
