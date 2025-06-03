@@ -197,7 +197,11 @@ async def process_quiz_answer(callback_query: types.CallbackQuery):
             user_states[user_id] += 1
             await send_next_quest(user_id)
 
+    if condition:
+            await bot.send_message(...)
         else:
+            await bot.send_message(...)
+
             await bot.send_message(user_id, "🎉 Поздравляю, ты прошёл опрос! Ты почти у цели… Скоро тебя ждёт кое-что очень приятное 🎁❤️")
             await bot.send_message(user_id, """💃 А теперь — бонусное задание! Включи свою любимую песню и потанцуй 🕺
 👁️‍🗨️ Важно: жена должна видеть! Потом уже — подарок 🎁""")
