@@ -146,20 +146,23 @@ if len(parts) < 3:
         await callback_query.answer("⏭ Ответ не принят: ты либо уже прошёл этот вопрос, либо ещё не дошёл до него")
         return
 
-   if selected in question["options"]:
-    is_correct, comment = question["options"][selected]
-    await callback_query.answer()
-    await bot.send_message(user_id, comment)
+    if selected in question["options"]:
+        is_correct, comment = question["options"][selected]
+        await callback_query.answer()
+        await bot.send_message(user_id, comment)
 
-    if is_correct:
-        quiz_progress[user_id] = q_idx + 1
-        await asyncio.sleep(1)
-        if quiz_progress[user_id] < len(questions):
-            await send_quiz_sequence(user_id)
+        if is_correct:
+            quiz_progress[user_id] = q_idx + 1
+            await asyncio.sleep(1)
+            if quiz_progress[user_id] < len(questions):
+                await send_quiz_sequence(user_id)
+            else:
+                await bot.send_message(user_id, "🎉 Ты прошёл все вопросы! 🎁")
+                user_states[user_id] += 1
+                await send_next_quest(user_id)
         else:
-            await bot.send_message(user_id, "🎉 Ты прошёл все вопросы! 🎁")
-            user_states[user_id] += 1
-            await send_next_quest(user_id)
+            await bot.send_message(user_id, "❌ Нет, не так! Попробуй ещё раз.")
+
     else:
         await callback_query.answer("🤔 Неизвестный ответ")
         return
