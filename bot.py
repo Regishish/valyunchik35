@@ -192,14 +192,14 @@ async def process_quiz_answer(callback_query: types.CallbackQuery):
         if q_idx + 1 < len(questions):
             quiz_progress[user_id] = q_idx + 1
             await send_quiz_sequence(user_id)
-        else:
+    else:
             await bot.send_message(user_id, "🎉 Ты прошёл все вопросы! Финальный код: 1335")
             user_states[user_id] += 1
             await send_next_quest(user_id)
 
     if condition:
             await bot.send_message(...)
-        else:
+    else:
             await bot.send_message(...)
 
             await bot.send_message(user_id, "🎉 Поздравляю, ты прошёл опрос! Ты почти у цели… Скоро тебя ждёт кое-что очень приятное 🎁❤️")
