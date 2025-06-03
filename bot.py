@@ -62,6 +62,10 @@ async def handle_user_response(message: types.Message):
         state = user_states.get(message.from_user.id, 0)
         if state < len(QUESTS):
             user_states[message.from_user.id] += 1
+            await send_next_quest(message.from_user.id)
+        elif state == len(QUESTS):
+            # Если пользователь прислал ещё сообщение на старое задание — просто проигнорировать
+            pass
 
             # Похвалы после каждого задания
             compliments = [
