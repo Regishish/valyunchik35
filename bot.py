@@ -275,8 +275,6 @@ async def send_quiz_sequence(user_id):
 
 processing_users = set()
 
-processing_users = set()
-
 @dp.callback_query_handler(lambda c: c.data.startswith("quiz_"))
 async def handle_quiz_answer(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
