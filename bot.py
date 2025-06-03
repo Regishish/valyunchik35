@@ -227,8 +227,7 @@ async def handle_ready(callback_query: CallbackQuery):
     await send_next_quest(user_id)
 
     _, q_idx_str, selected = parts
-    try:
-        q_idx = int(q_idx_str)
+    q_idx = int(q_idx_str)
     except ValueError:
         await callback_query.answer("🤔 Неизвестный ответ")
         return
