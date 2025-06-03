@@ -305,13 +305,17 @@ async def handle_quiz_answer(callback_query: types.CallbackQuery):
         if quiz_progress.get(user_id, 0) > q_idx:
             await callback_query.answer("🔁 Этот вопрос уже пройден")
             return
+       try:
+    question = questions[q_idx]
 
-        question = questions[q_idx]
+    if selected in question["options"]:
+        is_correct, comment = question["options"][selected]
+        await callback_query.answer()
+        await bot.send_message(user_id, comment)
 
-if selected in question["options"]:
-    is_correct, comment = question["options"][selected]
-    await callback_query.answer()
-    await bot.send_message(user_id, comment)
+except KeyError:
+    await bot.send_message(user_id, "Что-то пошло не так. Повторите попытку.")
+
 
     if is_correct:
         quiz_progress[user_id] = q_idx + 1
