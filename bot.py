@@ -114,6 +114,7 @@ async def handle_ready(callback_query: CallbackQuery):
         await bot.send_message(user_id, compliments[index])
 
     user_states[user_id] += 1
+if user_states[user_id] <= len(QUESTS):
     await send_next_quest(user_id)
     
 async def send_quiz_sequence(user_id):
