@@ -77,10 +77,11 @@ quiz_progress = {}
 @dp.message_handler(commands=['start'])
 async def start_game(message: types.Message):
     if message.from_user.id in USER_IDS:
-        user_states[message.from_user.id] = 0
-        quiz_progress[message.from_user.id] = 0
+        user_id = message.from_user.id
+        user_states[user_id] = 0
+        quiz_progress[user_id] = 0
         await message.answer("🎉 Поздравляю, ты в игре! Сегодня тебя ждёт несколько заданий, а в конце — подарочек.")
-        await send_next_quest(message.from_user.id)
+        await send_next_quest(user_id)
 
 async def send_next_quest(user_id):
     index = user_states.get(user_id, 0)
@@ -94,8 +95,14 @@ async def send_next_quest(user_id):
             quest_text + "\n\n📸 Сделал задание? Жми «Готово», если всё выполнено!",
             reply_markup=markup
         )
+    elif index == len(QUESTS):
+        await bot.send_message(user_id, "🎯 Теперь — мини-викторина 😊")
+        quiz_progress[user_id] = 0
+        await send_quiz_sequence(user_id)
+    else:
+        await bot.send_message(user_id, "🎉 Всё выполнено! Поздравляю! 🎈")
 
- @dp.callback_query_handler(lambda c: c.data == "ready")
+@dp.callback_query_handler(lambda c: c.data == "ready")
 async def handle_ready(callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     index = user_states.get(user_id, 0)
@@ -105,17 +112,8 @@ async def handle_ready(callback_query: CallbackQuery):
     if index < len(compliments):
         await bot.send_message(user_id, compliments[index])
 
-    if index < len(QUESTS):
-        user_states[user_id] = index + 1
-        await send_next_quest(user_id)
-
-    elif index == len(QUESTS) and quiz_progress.get(user_id, 0) == 0:
-        await bot.send_message(user_id, "🎯 Теперь — мини-викторина 😊")
-        quiz_progress[user_id] = 0
-        await send_quiz_sequence(user_id)
-
-    elif quiz_progress.get(user_id, 0) >= len(questions):
-        await bot.send_message(user_id, "🎉 Всё выполнено! Поздравляю! 🎈")
+    user_states[user_id] += 1
+    await send_next_quest(user_id)
 
 quiz_progress = {}
 
