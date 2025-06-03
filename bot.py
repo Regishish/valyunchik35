@@ -249,20 +249,19 @@ async def handle_ready(callback_query: CallbackQuery):
         await bot.send_message(user_id, comment)
 
         if is_correct:
-            print(f"📍 Отправляем вопрос №{q_idx + 1} пользователю {user_id}")
-            quiz_progress[user_id] = q_idx + 1
-            await asyncio.sleep(1)
-            if quiz_progress[user_id] < len(questions):
-                print(f"➡ Переход к вопросу {quiz_progress[user_id]}")
-                await send_quiz_sequence(user_id)
-            else:
-                print("🎉 Все вопросы пройдены — финал")
-                await bot.send_message(user_id, "🎉 Всё выполнено! Поздравляю! 🎈")
-                user_states[user_id] += 1
-                await send_next_quest(user_id)
-        else:
-            await bot.send_message(user_id, "❌ Нет, не так! Попробуй ещё раз.")else:
-        await callback_query.answer("🤔 Неизвестный ответ")
+    print(f"📍 Отправляем вопрос №{q_idx + 1} пользователю {user_id}")
+    quiz_progress[user_id] = q_idx + 1
+    await asyncio.sleep(1)
+    if quiz_progress[user_id] < len(questions):
+        print(f"➡ Переход к вопросу {quiz_progress[user_id]}")
+        await send_quiz_sequence(user_id)
+    else:
+        print("🎉 Все вопросы пройдены — финал")
+        await bot.send_message(user_id, "🎉 Всё выполнено! Поздравляю! 🎈")
+        user_states[user_id] += 1
+        await send_next_quest(user_id)
+else:
+    await bot.send_message(user_id, "❌ Нет, не так! Попробуй ещё раз.")
 
 quiz_progress = {}
 async def send_quiz_sequence(user_id):
