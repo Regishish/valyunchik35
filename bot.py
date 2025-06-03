@@ -290,7 +290,6 @@ async def handle_quiz_answer(callback_query: types.CallbackQuery):
         return
 
     processing_users.add(user_id)
-    try:
         parts = callback_query.data.split("_", 2)
         if len(parts) < 3:
             await callback_query.answer("🤔 Неизвестный ответ")
