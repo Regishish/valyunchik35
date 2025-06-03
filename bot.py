@@ -141,30 +141,37 @@ questions = [
 ]
 
 user_states = {}
+quiz_progress = {}
+processing_users = set()
 
 @dp.message_handler()
 async def some_func(message: types.Message):
     if message.from_user.id in USER_IDS:
         await message.answer("✅ Принято!")
+
     user_id = message.from_user.id
     user_states[user_id] = 0
-        quiz_progress[user_id] = 0
+    quiz_progress[user_id] = 0
+
     await message.answer("🎉 Поздравляю, ты в игре! Сегодня тебя ждёт несколько заданий, а в конце — подарочек.")
     await send_next_quest(user_id)
 
+async def send_next_quest(user_id):
+    index = user_states.get(user_id, 0)
+
     if index < len(QUESTS):
-    quest_text = QUESTS[index]["text"]
+        quest_text = QUESTS[index]["text"]
         markup = InlineKeyboardMarkup()
         markup.add(InlineKeyboardButton("Готово ✅", callback_data="ready"))
         await bot.send_message(
-        user_id,
-        quest_text + "\n\n📸 Сделал задание? Жми «Готово», если всё выполнено!",
-        reply_markup=markup
-    )
+            user_id,
+            quest_text + "\n\n📸 Сделал задание? Жми «Готово», если всё выполнено!",
+            reply_markup=markup
+        )
     elif index == len(QUESTS):
         await bot.send_message(user_id, "🎯 Теперь — мини-викторина 😊")
         quiz_progress[user_id] = 0
-    await send_quiz_sequence(user_id)
+        await send_quiz_sequence(user_id)
     else:
         await bot.send_message(user_id, "🎉 Всё выполнено! Поздравляю! 🎈")
 
@@ -178,161 +185,68 @@ async def handle_ready(callback_query: CallbackQuery):
     if index < len(compliments):
         await bot.send_message(user_id, compliments[index])
 
-user_states[user_id] += 1
-await send_next_quest(user_id)
-
-user_states = {}
-quiz_progress = {}
-@dp.message_handler()
-
-    index = user_states.get(user_id, 0)
-
-    if index < len(QUESTS):
-    quest_text = QUESTS[index]["text"]
-        markup = InlineKeyboardMarkup()
-        markup.add(InlineKeyboardButton("Готово ✅", callback_data="ready"))
-        await bot.send_message(
-        user_id,
-        quest_text + "\n\n📸 Сделал задание? Жми «Готово», если всё выполнено!",
-        reply_markup=markup
-    )
-    elif index == len(QUESTS):
-        await bot.send_message(user_id, "🎯 Теперь — мини-викторина 😊")
-        quiz_progress[user_id] = 0
-    await send_quiz_sequence(user_id)
-    else:
-        await bot.send_message(user_id, "🎉 Всё выполнено! Поздравляю! 🎈")
-
-@dp.callback_query_handler(lambda c: c.data == "ready")
-    user_id = callback_query.from_user.id
-    index = user_states.get(user_id, 0)
-
-    await callback_query.answer("✅ Задание отмечено как выполненное!")
-
-    if index < len(compliments):
-        await bot.send_message(user_id, compliments[index])
-
-user_states[user_id] += 1
-await send_next_quest(user_id)
-
-try:
-    _, q_idx_str, selected = parts
-    q_idx = int(q_idx_str)
-except ValueError:
-    await callback_query.answer("🤔 Неизвестный ответ")
-    return
-
-if q_idx >= len(questions):
-    await callback_query.answer("🧠 Викторина уже завершена.")
-    return
-    
-if q_idx >= len(questions):
-    await callback_query.answer("🧠 Викторина уже завершена.")
-return
-
-current_progress = quiz_progress.get(user_id, 0)
-if q_idx != current_progress:
-    await callback_query.answer("⏭ Ответ не принят: ты либо уже прошёл этот вопрос, либо ещё не дошёл до него")
-    return
-
-question = questions[q_idx]
-
-if selected in question["options"]:
-is_correct, comment = question["options"][selected]
-    await callback_query.answer()
-        await bot.send_message(user_id, comment)
-
-if is_correct:
-    print(f"📍 Отправляем вопрос №{q_idx + 1} пользователю {user_id}")
-        quiz_progress[user_id] = q_idx + 1
-await asyncio.sleep(1)
-if quiz_progress[user_id] < len(questions):
-    print(f"➡ Переход к вопросу {quiz_progress[user_id]}")
-    await send_quiz_sequence(user_id)
-    else:
-    print("🎉 Все вопросы пройдены — финал")
-        await bot.send_message(user_id, "🎉 Всё выполнено! Поздравляю! 🎈")
     user_states[user_id] += 1
     await send_next_quest(user_id)
-if is_correct:
-print("Все верно!")
-    else:
-print("Попробуй ещё раз.")
-quiz_progress = {}
-async def send_quiz_sequence(user_id):
-q_idx = quiz_progress.get(user_id, 0)
-if q_idx < len(questions):
-    q = questions[q_idx]
-        markup = InlineKeyboardMarkup()
-    for option in q["options"].keys():
-        markup.add(InlineKeyboardButton(option, callback_data=f"quiz_{q_idx}_{option}"))
-        await bot.send_message(user_id, q["text"], reply_markup=markup)
 
-processing_users = set()
+async def send_quiz_sequence(user_id):
+    q_idx = quiz_progress.get(user_id, 0)
+    if q_idx < len(questions):
+        q = questions[q_idx]
+        markup = InlineKeyboardMarkup()
+        for option in q["options"].keys():
+            markup.add(InlineKeyboardButton(option, callback_data=f"quiz_{q_idx}_{option}"))
+        await bot.send_message(user_id, q["text"], reply_markup=markup)
 
 @dp.callback_query_handler(lambda c: c.data.startswith("quiz_"))
 async def handle_quiz_answer(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
 
-if user_id in processing_users:
-    await callback_query.answer("⏳ Подожди секунду...")
-    return
-
-processing_users.add(user_id)
-parts = callback_query.data.split("_", 2)
-    if len(parts) < 3:
-    await callback_query.answer("🤔 Неизвестный ответ")
+    if user_id in processing_users:
+        await callback_query.answer("⏳ Подожди секунду...")
         return
 
-q_idx_str, selected = parts[1], parts[2]
-q_idx = int(q_idx_str)
-except ValueError:
-    await callback_query.answer("🤔 Неизвестный ответ")
-return
+    processing_users.add(user_id)
+    try:
+        parts = callback_query.data.split("_", 2)
+        if len(parts) < 3:
+            await callback_query.answer("🤔 Неизвестный ответ")
+            return
 
-if q_idx >= len(questions):
-    await callback_query.answer("🧠 Викторина уже завершена.")
-return
+        q_idx_str, selected = parts[1], parts[2]
+        try:
+            q_idx = int(q_idx_str)
+        except ValueError:
+            await callback_query.answer("🤔 Неизвестный ответ")
+            return
 
-if quiz_progress.get(user_id, 0) > q_idx:
-    await callback_query.answer("📌 Этот вопрос уже пройден")
-return
+        if q_idx >= len(questions):
+            await callback_query.answer("🧠 Викторина уже завершена.")
+            return
 
-question = questions[q_idx]  # ⬅️ Уровень отступа: 0 внутри функции
-if selected in question["options"]:
-is_correct, comment = question["options"][selected]
-    await callback_query.answer()
-        await bot.send_message(user_id, comment)
+        if quiz_progress.get(user_id, 0) > q_idx:
+            await callback_query.answer("📌 Этот вопрос уже пройден")
+            return
 
-if is_correct:
-        quiz_progress[user_id] = q_idx + 1
-    await asyncio.sleep(1)
-    if quiz_progress[user_id] < len(questions):
-        await send_quiz_sequence(user_id)
-    else:
-        await bot.send_message(user_id, "🎉 Всё выполнено! Поздравляю! 🎈")
-    else:
-    await callback_query.answer("🤔 Неизвестный ответ")
+        question = questions[q_idx]
+        if selected in question["options"]:
+            is_correct, comment = question["options"][selected]
+            await callback_query.answer()
+            await bot.send_message(user_id, comment)
 
-except KeyError:
+            if is_correct:
+                quiz_progress[user_id] = q_idx + 1
+                await asyncio.sleep(1)
+                if quiz_progress[user_id] < len(questions):
+                    await send_quiz_sequence(user_id)
+                else:
+                    await bot.send_message(user_id, "🎉 Всё выполнено! Поздравляю! 🎈")
+                    await handle_quiz_completion(user_id)
+        else:
+            await callback_query.answer("🤔 Неизвестный ответ")
+    except KeyError:
         await bot.send_message(user_id, "Что-то пошло не так. Повторите попытку.")
-
-
-if is_correct:
-        quiz_progress[user_id] = q_idx + 1
-    await asyncio.sleep(1)
-    if quiz_progress[user_id] < len(questions):
-        await send_quiz_sequence(user_id)
-    else:
-        await bot.send_message(user_id, "🎉 Всё выполнено! Поздравляю! 🎈")
-        await handle_quiz_completion(user_id)
-# ⛔️ else убираем, так как сообщение уже отправлено выше как `comment`
-        
-    await callback_query.answer("🤔 Неизвестный ответ")
-
-finally:
-    processing_users.remove(user_id)  # 👈 Ставится ВНЕ всех условий, в конце try
-
+    finally:
+        processing_users.remove(user_id)
 
 
 async def send_hourly_compliments():
