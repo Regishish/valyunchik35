@@ -223,21 +223,20 @@ async def handle_ready(callback_query: CallbackQuery):
     if index < len(compliments):
         await bot.send_message(user_id, compliments[index])
 
-user_states[user_id] += 1
+    user_states[user_id] += 1
     await send_next_quest(user_id)
 
-try:
-    _, q_idx_str, selected = parts
-    q_idx = int(q_idx_str)
-except ValueError:
-    await callback_query.answer("🤔 Неизвестный ответ")
-    return
+    try:
+        _, q_idx_str, selected = parts
+        q_idx = int(q_idx_str)
+    except ValueError:
+        await callback_query.answer("🤔 Неизвестный ответ")
+        return
 
-if q_idx >= len(questions):
-    await callback_query.answer("🧠 Викторина уже завершена.")
-    return
-
-
+    if q_idx >= len(questions):
+        await callback_query.answer("🧠 Викторина уже завершена.")
+        return
+        
 if q_idx >= len(questions):
     await callback_query.answer("🧠 Викторина уже завершена.")
     return
