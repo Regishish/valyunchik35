@@ -122,12 +122,13 @@ async def handle_quiz_answer(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     parts = callback_query.data.split("|||", 2)
 
-    if len(parts) < 3:
-      else:
+    parts = callback_query.data.split("|||", 2)
+
+if len(parts) < 3:
+  else:
     await callback_query.answer()
     await bot.send_message(user_id, f"❌ Нет, не так! {question['options'].get(selected, ('', 'Неизвестный ответ'))[1]}")
-
-        return
+    return
 
     _, q_idx_str, selected = parts
     try:
