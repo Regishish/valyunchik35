@@ -309,7 +309,7 @@ async def handle_quiz_answer(callback_query: types.CallbackQuery):
         if quiz_progress.get(user_id, 0) > q_idx:
             await callback_query.answer("🔁 Этот вопрос уже пройден")
             return
-       try:
+    try:
     question = questions[q_idx]
 
     if selected in question["options"]:
@@ -330,8 +330,7 @@ except KeyError:
             await bot.send_message(user_id, "🎉 Всё выполнено! Поздравляю! 🎈")
             await handle_quiz_completion(user_id)
 # ⛔️ else убираем, так как сообщение уже отправлено выше как `comment`
-
-        else:
+            
             await callback_query.answer("🤔 Неизвестный ответ")
 
     finally:
