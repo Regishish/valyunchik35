@@ -232,7 +232,7 @@ async def handle_quiz_answer(callback_query: types.CallbackQuery):
             if quiz_progress[user_id] < len(questions):
                 await send_quiz_sequence(user_id)
             else:
-                await bot.send_message(user_id, "🎉 Ты прошёл все вопросы! 🎁")
+                await bot.send_message(user_id, "🎉 Ты прошёл все вопросы! С Днем Рождения, мой любимый Мужчина Мечты! Получи свой подарок у жены 🎁")
                 await handle_quiz_completion(user_id)
         else:
             await bot.send_message(user_id, "❌ Нет, не так! Попробуй ещё раз.")
