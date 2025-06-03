@@ -228,12 +228,6 @@ async def handle_ready(callback_query: CallbackQuery):
     user_states[user_id] += 1
     await send_next_quest(user_id)
 
-    if len(parts) < 3:
-        comment = "🤔 Неизвестный ответ"
-        await callback_query.answer()
-        await bot.send_message(user_id, f"❌ Нет, не так! {comment}")
-        return
-
     _, q_idx_str, selected = parts
     try:
         q_idx = int(q_idx_str)
