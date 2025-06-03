@@ -176,14 +176,26 @@ async def send_quiz_sequence(user_id):
             }
         }
     ]
+@dp.callback_query_handler(lambda c: c.data.startswith("quiz_"))
+async def process_quiz_answer(callback_query: types.CallbackQuery):
+    user_id = callback_query.from_user.id
+    if user_id not in quiz_progress:
+        return
 
-                is_correct, comment = questions[q_idx]["options"].get(selected, (False, "🤔 Неизвестный ответ"))
-        await bot.answer_callback_query(callback_query.id, text=comment)
+    q_idx = quiz_progress[user_id]
+    selected = callback_query.data.replace("quiz_", "")
 
-        if is_correct:
-            if q_idx + 1 < len(questions):
-                quiz_progress[user_id] = q_idx + 1
-                await send_quiz_sequence(user_id)
+    is_correct, comment = questions[q_idx]["options"].get(selected, (False, "🤔 Неизвестный ответ"))
+    await bot.answer_callback_query(callback_query.id, text=comment)
+
+    if is_correct:
+        if q_idx + 1 < len(questions):
+            quiz_progress[user_id] = q_idx + 1
+            await send_quiz_sequence(user_id)
+        else:
+            await bot.send_message(user_id, "🎉 Ты прошёл все вопросы! Финальный код: 1335")
+            user_states[user_id] += 1
+            await send_next_quest(user_id)
 
         else:
             await bot.send_message(user_id, "🎉 Поздравляю, ты прошёл опрос! Ты почти у цели… Скоро тебя ждёт кое-что очень приятное 🎁❤️")
