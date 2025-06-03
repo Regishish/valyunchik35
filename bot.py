@@ -115,7 +115,8 @@ async def handle_ready(callback_query: CallbackQuery):
 
     user_states[user_id] += 1
 if user_states[user_id] <= len(QUESTS):
-        await send_next_quest(user_id)
+        await handle_quiz_completion(user_id)
+    
     
 quiz_progress = {}
 
