@@ -84,15 +84,15 @@ async def start_game(message: types.Message):
 
 async def send_next_quest(user_id):
 index = user_states.get(user_id, 0)
-if index < len(QUESTS):
-    quest_text = QUESTS[index]["text"]
-    markup = InlineKeyboardMarkup().add(InlineKeyboardButton("Готово ✅", callback_data="ready"))
-    await bot.send_message(user_id, quest_text + "\n\n📸 Сделал задание? Жми «Готово», если всё выполнено!", reply_markup=markup)
+    if index < len(QUESTS):
+        quest_text = QUESTS[index]["text"]
+        markup = InlineKeyboardMarkup().add(InlineKeyboardButton("Готово ✅", callback_data="ready"))
+        await bot.send_message(user_id, quest_text + "\n\n📸 Сделал задание? Жми «Готово», если всё выполнено!", reply_markup=markup)
    elif index == len(QUESTS) and quiz_progress.get(user_id, 0) == 0:
-    await bot.send_message(user_id, "🎯 Теперь — мини-викторина 😊")
-    await send_quiz_sequence(user_id)
+        await bot.send_message(user_id, "🎯 Теперь — мини-викторина 😊")
+        await send_quiz_sequence(user_id)
 elif index > len(QUESTS):
-    await bot.send_message(user_id, "🎉 Всё выполнено! Поздравляю! 🎈")
+        await bot.send_message(user_id, "🎉 Всё выполнено! Поздравляю! 🎈")
 
 @dp.callback_query_handler(lambda c: c.data == "ready")
 async def handle_ready(callback_query: CallbackQuery):
