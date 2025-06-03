@@ -296,36 +296,34 @@ async def handle_quiz_answer(callback_query: types.CallbackQuery):
             await callback_query.answer("🤔 Неизвестный ответ")
             return
 
-        q_idx_str, selected = parts[1], parts[2]
-        try:
-            q_idx = int(q_idx_str)
-        except ValueError:
-            await callback_query.answer("🤔 Неизвестный ответ")
-            return
+       q_idx_str, selected = parts[1], parts[2]
+try:
+    q_idx = int(q_idx_str)
+except ValueError:
+    await callback_query.answer("🤔 Неизвестный ответ")
+    return
 
-        if q_idx >= len(questions):
-            await callback_query.answer("🧠 Викторина уже завершена.")
-            return
+if q_idx >= len(questions):
+    await callback_query.answer("🧠 Викторина уже завершена.")
+    return
 
-        if quiz_progress.get(user_id, 0) > q_idx:
-            await callback_query.answer("🔁 Этот вопрос уже пройден")
-            return
-question = questions[q_idx]
+if quiz_progress.get(user_id, 0) > q_idx:
+    await callback_query.answer("📌 Этот вопрос уже пройден")
+    return
 
+question = questions[q_idx]  # ⬅️ Уровень отступа: 0 внутри функции
 if selected in question["options"]:
     is_correct, comment = question["options"][selected]
     await callback_query.answer()
     await bot.send_message(user_id, comment)
 
-        if is_correct:
-            quiz_progress[user_id] = q_idx + 1
-            await asyncio.sleep(1)
-
-            if quiz_progress[user_id] < len(questions):
-                await send_quiz_sequence(user_id)
-            else:
-                await bot.send_message(user_id, "🎉 Всё выполнено! Поздравляю! 🎈")
-                await handle_quiz_completion(user_id)
+    if is_correct:
+        quiz_progress[user_id] = q_idx + 1
+        await asyncio.sleep(1)
+        if quiz_progress[user_id] < len(questions):
+            await send_quiz_sequence(user_id)
+        else:
+            await bot.send_message(user_id, "🎉 Всё выполнено! Поздравляю! 🎈")
         else:
             await callback_query.answer("🤔 Неизвестный ответ")
 
