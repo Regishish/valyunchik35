@@ -177,13 +177,14 @@ async def send_quiz_sequence(user_id):
         }
     ]
 
-        is_correct, comment = questions[q_idx]["options"].get(selected, (False, "🤔 Неизвестный ответ"))
-    await bot.answer_callback_query(callback_query.id, text=comment)
+                is_correct, comment = questions[q_idx]["options"].get(selected, (False, "🤔 Неизвестный ответ"))
+        await bot.answer_callback_query(callback_query.id, text=comment)
 
         if is_correct:
-        if q_idx + 1 < len(questions):
-            quiz_progress[user_id] = q_idx + 1
-            await send_quiz_sequence(user_id)
+            if q_idx + 1 < len(questions):
+                quiz_progress[user_id] = q_idx + 1
+                await send_quiz_sequence(user_id)
+
         else:
             await bot.send_message(user_id, "🎉 Поздравляю, ты прошёл опрос! Ты почти у цели… Скоро тебя ждёт кое-что очень приятное 🎁❤️")
             await bot.send_message(user_id, "💃 А теперь — бонусное задание! Включи свою любимую песню и потанцуй 🕺
