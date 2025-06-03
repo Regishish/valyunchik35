@@ -74,9 +74,8 @@ async def handle_user_response(message: types.Message):
     "🍽️ Я за любой твой выбор, особенно если мы идём туда вместе ❤️"
 ]
 
-            if state < len(compliments):
-                await message.reply(f"✅ Задание выполнено!
-{compliments[state]}")
+  if state < len(compliments):
+    await message.reply(f"✅ Задание выполнено!\n{compliments[state]}")
             
             await send_next_quest(message.from_user.id)
 
