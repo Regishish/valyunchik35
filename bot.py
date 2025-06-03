@@ -308,19 +308,19 @@ async def handle_quiz_answer(callback_query: types.CallbackQuery):
 
         question = questions[q_idx]
 
-        if selected in question["options"]:
-            is_correct, comment = question["options"][selected]
-            await callback_query.answer()
-            await bot.send_message(user_id, comment)
+       if selected in question["options"]:
+    is_correct, comment = question["options"][selected]
+    await callback_query.answer()
+    await bot.send_message(user_id, comment)
 
-        if is_correct:
-    quiz_progress[user_id] = q_idx + 1
+    if is_correct:
+        quiz_progress[user_id] = q_idx + 1
         await asyncio.sleep(1)
-    if quiz_progress[user_id] < len(questions):
-        await send_quiz_sequence(user_id)
-    else:
-        await bot.send_message(user_id, "🎉 Всё выполнено! Поздравляю! 🎈")
-        await handle_quiz_completion(user_id)
+        if quiz_progress[user_id] < len(questions):
+            await send_quiz_sequence(user_id)
+        else:
+            await bot.send_message(user_id, "🎉 Всё выполнено! Поздравляю! 🎈")
+            await handle_quiz_completion(user_id)
 # ⛔️ else убираем, так как сообщение уже отправлено выше как `comment`
 
         else:
