@@ -53,14 +53,24 @@ async def send_next_quest(user_id):
     if index < len(QUESTS):
         quest_text = QUESTS[index]["text"]
         markup = types.InlineKeyboardMarkup().add(
-            types.InlineKeyboardButton("✅ Готово", callback_data="task_done")
+        markup = types.InlineKeyboardMarkup()
+        markup.add(types.InlineKeyboardButton("Готово ✅", callback_data="ready"))
+        await bot.send_message(user_id, "📸 Сделал задание? Жми «Готово», если всё выполнено!", reply_markup=markup)
         )
         await bot.send_message(user_id, quest_text, reply_markup=markup)
     elif index == len(QUESTS):  # после последнего квеста
         await bot.send_message(user_id, "🎯 Теперь — мини-викторина 😊")
         quiz_progress[user_id] = 0  # <--- обязательно инициализируем индекс!
         await send_quiz_sequence(user_id)
-
+@dp.callback_query_handler(lambda c: c.data == "ready")
+async def handle_ready(callback_query: types.CallbackQuery):
+    user_id = callback_query.from_user.id
+    await bot.answer_callback_query(callback_query.id, text="Молодец! Задание принято ✅")
+    
+    # логика перехода к следующему заданию
+    user_states[user_id] += 1
+    await send_next_quest(user_id)
+    
 @dp.message_handler(content_types=types.ContentType.ANY)
 async def handle_user_response(message: types.Message):
     if message.from_user.id in USER_IDS:
@@ -111,12 +121,6 @@ questions = [
             "Спим": (False, "Спишь хаха 😴"),
             "Сам знаешь что…": (False, "Мимо, но я не против 😏")
         }
-    },
-    {
-        "text": "2️⃣ Какой сериал я заставила тебя смотреть, ты сопротивлялся, а потом каааак втянулся!",
-        "options": {
-            "Зимородок": (False, "Ты, конечно, знаешь всех Корханов, но нет 😅"),
-       }
     },
     {
             "text": "2️⃣ Какой сериал я заставила тебя смотреть, ты сопротивлялся, а потом каааак втянулся!",
