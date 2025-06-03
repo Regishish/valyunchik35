@@ -228,11 +228,6 @@ async def handle_ready(callback_query: CallbackQuery):
     user_states[user_id] += 1
     await send_next_quest(user_id)
 
-@dp.callback_query_handler(lambda c: c.data.startswith("quiz|||"))
-async def handle_quiz_answer(callback_query: types.CallbackQuery):
-    user_id = callback_query.from_user.id
-    parts = callback_query.data.split("|||", 2)
-
     if len(parts) < 3:
         comment = "🤔 Неизвестный ответ"
         await callback_query.answer()
