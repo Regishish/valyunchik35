@@ -275,56 +275,63 @@ async def send_quiz_sequence(user_id):
             markup.add(InlineKeyboardButton(option, callback_data=f"quiz_{q_idx}_{option}"))
         await bot.send_message(user_id, q["text"], reply_markup=markup)
 
+processing_users = set()
+
+processing_users = set()
+
 @dp.callback_query_handler(lambda c: c.data.startswith("quiz_"))
 async def handle_quiz_answer(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
-    parts = callback_query.data.split("_", 2)
-    if len(parts) < 3:
-        await callback_query.answer("🤔 Неизвестный ответ")
+
+    if user_id in processing_users:
+        await callback_query.answer("⏳ Подожди секунду...")
         return
 
-    q_idx_str, selected = parts[1], parts[2]
+    processing_users.add(user_id)
     try:
-        q_idx = int(q_idx_str)
-    except ValueError:
-        await callback_query.answer("🤔 Неизвестный ответ")
-        return
+        parts = callback_query.data.split("_", 2)
+        if len(parts) < 3:
+            await callback_query.answer("🤔 Неизвестный ответ")
+            return
 
-    if q_idx >= len(questions):
-        await callback_query.answer("🧠 Викторина уже завершена.")
-        return
+        q_idx_str, selected = parts[1], parts[2]
+        try:
+            q_idx = int(q_idx_str)
+        except ValueError:
+            await callback_query.answer("🤔 Неизвестный ответ")
+            return
 
-    if quiz_progress.get(user_id, 0) > q_idx:
-        await callback_query.answer("🔁 Этот вопрос уже пройден")
-        return
+        if q_idx >= len(questions):
+            await callback_query.answer("🧠 Викторина уже завершена.")
+            return
 
-    # ✅ переместили сюда — теперь переменная точно существует
-    question = questions[q_idx]
+        if quiz_progress.get(user_id, 0) > q_idx:
+            await callback_query.answer("🔁 Этот вопрос уже пройден")
+            return
 
-    if selected in question["options"]:
-        is_correct, comment = question["options"][selected]
-        await callback_query.answer()
-        await bot.send_message(user_id, comment)
-        
         question = questions[q_idx]
 
-    if selected in question["options"]:
-        is_correct, comment = question["options"][selected]
-        await callback_query.answer()
-        await bot.send_message(user_id, comment)
+        if selected in question["options"]:
+            is_correct, comment = question["options"][selected]
+            await callback_query.answer()
+            await bot.send_message(user_id, comment)
 
-        if is_correct:
-            quiz_progress[user_id] = q_idx + 1
-            await asyncio.sleep(1)
-            if quiz_progress[user_id] < len(questions):
-                await send_quiz_sequence(user_id)
+            if is_correct:
+                quiz_progress[user_id] = q_idx + 1
+                await asyncio.sleep(1)
+                if quiz_progress[user_id] < len(questions):
+                    await send_quiz_sequence(user_id)
+                else:
+                    await bot.send_message(user_id, "🎉 Всё выполнено! Поздравляю! 🎈")
+                    await handle_quiz_completion(user_id)
             else:
-                await bot.send_message(user_id, "🎉 Ты прошёл все вопросы! 🎁")
-                await handle_quiz_completion(user_id)
+                await bot.send_message(user_id, "❌ Нет, не так! Попробуй ещё раз.")
         else:
-            await bot.send_message(user_id, "❌ Нет, не так! Попробуй ещё раз.")
-    else:
-        await callback_query.answer("🤔 Неизвестный ответ")
+            await callback_query.answer("🤔 Неизвестный ответ")
+    
+    finally:
+        processing_users.remove(user_id)  # 👈 Ставится ВНЕ всех условий, в конце try
+
 
 
 async def send_hourly_compliments():
