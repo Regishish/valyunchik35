@@ -95,12 +95,12 @@ async def send_next_quest(user_id):
             reply_markup=markup
         )
 
-    elif index == len(QUESTS) and quiz_progress.get(user_id, 0) == 0:
-        await bot.send_message(user_id, "🎯 Теперь — мини-викторина 😊")
-        quiz_progress[user_id] = 0
-        await send_quiz_sequence(user_id)
+  elif index == len(QUESTS) and quiz_progress.get(user_id, 0) == 0:
+    await bot.send_message(user_id, "🎯 Теперь — мини-викторина 😊")
+    quiz_progress[user_id] = 0
+    await send_quiz_sequence(user_id)
 
-   @dp.callback_query_handler(lambda c: c.data == "ready")
+@dp.callback_query_handler(lambda c: c.data == "ready")
 async def handle_ready(callback_query: CallbackQuery):
     user_id = callback_query.from_user.id
     index = user_states.get(user_id, 0)
@@ -110,7 +110,8 @@ async def handle_ready(callback_query: CallbackQuery):
     if index < len(compliments):
         await bot.send_message(user_id, compliments[index])
 
-    user_states[user_id] += 1
+    user_states[user_id] = user_states.get(user_id, 0) + 1
+    await send_next_quest(user_id)
 
     if user_states[user_id] <= len(QUESTS):
     else:
