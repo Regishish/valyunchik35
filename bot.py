@@ -15,6 +15,10 @@ USER_IDS = [int(uid) for uid in os.getenv("USER_IDS", "").split(",")]
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
+# 👉 Глобальные состояния пользователей
+user_states = {}
+quiz_progress = {}
+processing_users = set()
 
 # === Фото-комплименты ===
 photos_with_captions = [
