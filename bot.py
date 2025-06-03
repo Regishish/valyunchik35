@@ -76,7 +76,7 @@ quiz_progress = {}
 
 @dp.message_handler(commands=['start'])
 async def start_game(message: types.Message):
-if message.from_user.id in USER_IDS:
+    if message.from_user.id in USER_IDS:
     user_states[message.from_user.id] = 0
     quiz_progress[message.from_user.id] = 0
     await message.answer("🎉 Поздравляю, ты в игре! Сегодня тебя ждёт несколько заданий, а в конце — подарочек.")
