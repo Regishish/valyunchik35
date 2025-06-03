@@ -198,10 +198,7 @@ async def send_next_quest(user_id):
             user_id,
             quest_text + "\n\n📸 Сделал задание? Жми «Готово», если всё выполнено!",
             reply_markup=markup
-        )
-    elif index == len(QUESTS):
-        await bot.send_message(user_id, "🎯 Теперь — мини-викторина 😊")
-        quiz_progress[user_id] = 0
+      
         await send_quiz_sequence(user_id)
     else:
         await bot.send_message(user_id, "🎉 Всё выполнено! Поздравляю! 🎈")
@@ -319,25 +316,6 @@ async def handle_quiz_answer(callback_query: types.CallbackQuery):
 
         if is_correct:
             quiz_progress[user_id] = q_idx + 1
-            await asyncio.sleep(1)
-            if quiz_progress[user_id] < len(questions):
-                await send_quiz_sequence(user_id)
-            else:
-                await bot.send_message(user_id, "🎉 Ты прошёл все вопросы! 🎁")
-                await handle_quiz_completion(user_id)
-        else:
-            await bot.send_message(user_id, "❌ Нет, не так! Попробуй ещё раз.")
-    else:
-        await callback_query.answer("🤔 Неизвестный ответ")
-
-
-async def send_hourly_compliments():
-    while True:
-        now = datetime.now()
-        if 9 <= now.hour <= 21:
-            index = (now.hour - 9) % len(photos_with_captions)
-            for user_id in USER_IDS:
-                photo, caption = photos_with_captions[index]
                 try:
                     await bot.send_photo(chat_id=user_id, photo=InputFile(photo), caption=caption)
                 except Exception as e:
