@@ -235,21 +235,6 @@ async def handle_quiz_answer(callback_query: types.CallbackQuery):
             await bot.send_message(user_id, "❌ Нет, не так! Попробуй ещё раз.")
     else:
         await callback_query.answer("🤔 Неизвестный ответ")
-        
-        question = questions[q_idx]
-
-        is_correct, comment = question["options"][selected]
-        await callback_query.answer()
-        await bot.send_message(user_id, comment)
-
-        if is_correct:
-    quiz_progress[user_id] = q_idx + 1
-    await asyncio.sleep(1)
-    if quiz_progress[user_id] < len(questions):
-        await send_quiz_sequence(user_id)
-    else:
-        await bot.send_message(user_id, "🎉 Всё выполнено! Поздравляю! 🎈")
-        await handle_quiz_completion(user_id)
 
 async def send_hourly_compliments():
     from datetime import datetime
