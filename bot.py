@@ -141,7 +141,6 @@ questions = [
 ]
 
 user_states = {}
-quiz_progress = {}
 
 @dp.message_handler(commands=['start'])
 async def start_game(message: types.Message):
@@ -186,7 +185,6 @@ async def handle_ready(callback_query: CallbackQuery):
 
 user_states = {}
 quiz_progress = {}
-
 @dp.message_handler(commands=['start'])
 async def start_game(message: types.Message):
     if message.from_user.id in USER_IDS:
@@ -266,7 +264,6 @@ async def handle_ready(callback_query: CallbackQuery):
         await callback_query.answer("🤔 Неизвестный ответ")
 
 quiz_progress = {}
-
 async def send_quiz_sequence(user_id):
     q_idx = quiz_progress.get(user_id, 0)
     if q_idx < len(questions):
