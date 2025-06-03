@@ -75,7 +75,7 @@ async def handle_user_response(message: types.Message):
 ]
 
             if state < len(compliments):
-                await message.reply(f"✅ Задание выполнено!
+                await message.reply(f"✅ Задание выполнено!\n{compliments[state]}")
 {compliments[state]}")
             
             await send_next_quest(message.from_user.id)
@@ -182,9 +182,7 @@ async def send_quiz_sequence(user_id):
             await send_quiz_sequence(user_id)
         else:
             await bot.send_message(user_id, "🎉 Поздравляю, ты прошёл опрос! Ты почти у цели… Скоро тебя ждёт кое-что очень приятное 🎁❤️")
-            await bot.send_message(user_id, "💃 А теперь — бонусное задание! Включи свою любимую песню и потанцуй 🕺
-
-👁️‍🗨️ Важно: жена должна видеть! Потом уже — подарок 🎁")
+           await bot.send_message(user_id, "💃 А теперь — бонусное задание! Включи свою любимую песню и потанцуй 🕺\\n\\n👁️‍🗨️ Важно: жена должна видеть! Потом уже — подарок 🎁")
 
 async def send_hourly_compliments():
     while True:
