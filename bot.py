@@ -208,41 +208,31 @@ async def send_quiz_sequence(user_id):
         for option in q["options"].keys():
             markup.add(types.InlineKeyboardButton(option, callback_data=f"quiz_{option}"))
         await bot.send_message(user_id, q["text"], reply_markup=markup)
+
 @dp.callback_query_handler(lambda c: c.data.startswith("quiz_"))
 async def handle_quiz_answer(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
-    q_idx = quiz_progress.get(user_id, 0)
     selected = callback_query.data.replace("quiz_", "")
-    q = questions[q_idx]
+    q_idx = quiz_progress.get(user_id, 0)
 
-    is_correct, comment = q["options"].get(selected, (False, "🤔 Неизвестный ответ"))
+    if q_idx >= len(questions):
+        await bot.answer_callback_query(callback_query.id, text="🧠 Викторина уже завершена.")
+        return
+
+    question = questions[q_idx]
+    is_correct, comment = question["options"].get(selected, (False, "🤔 Неизвестный ответ"))
     await bot.answer_callback_query(callback_query.id, text=comment)
 
     if is_correct:
         quiz_progress[user_id] = q_idx + 1
+
         if quiz_progress[user_id] < len(questions):
             await send_quiz_sequence(user_id)
         else:
-            await bot.send_message(user_id, "🎉 Ты прошёл все вопросы! Остался последний квест.")
-            await bot.send_message(user_id, "💃 Включи музыку и танцуй. Главное — чтобы жена видела 🕺")
-
-    if is_correct:
-        if q_idx + 1 < len(questions):
-            quiz_progress[user_id] = q_idx + 1
-            await send_quiz_sequence(user_id)
-    else:
-            await bot.send_message(user_id, "🎉 Ты прошёл все вопросы! Финальный код: 1335")
+            await bot.send_message(user_id, "🎉 Ты прошёл все вопросы! 🎁")
+            await asyncio.sleep(1)
             user_states[user_id] += 1
             await send_next_quest(user_id)
-
-    if condition:
-            await bot.send_message(...)
-    else:
-            await bot.send_message(...)
-
-            await bot.send_message(user_id, "🎉 Поздравляю, ты прошёл опрос! Ты почти у цели… Скоро тебя ждёт кое-что очень приятное 🎁❤️")
-            await bot.send_message(user_id, """💃 А теперь — бонусное задание! Включи свою любимую песню и потанцуй 🕺
-👁️‍🗨️ Важно: жена должна видеть! Потом уже — подарок 🎁""")
 
 async def send_hourly_compliments():
     while True:
