@@ -5,7 +5,7 @@ from aiogram.utils import executor
 import logging
 import asyncio
 from aiogram import Bot, Dispatcher, types
-from aiogram.types import InputFile, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InputFile, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from aiogram.utils import executor
 from datetime import datetime
 
