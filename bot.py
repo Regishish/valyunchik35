@@ -216,42 +216,6 @@ async def handle_ready(callback_query: CallbackQuery):
     user_states[user_id] += 1
     await send_next_quest(user_id)
 
-    _, q_idx_str, selected = parts
-    try:
-        q_idx = int(q_idx_str)
-    except ValueError:
-        await callback_query.answer("🤔 Неизвестный ответ")
-        return
-
-    if q_idx >= len(questions):
-        await callback_query.answer("🧠 Викторина уже завершена.")
-        return
-
-    current_progress = quiz_progress.get(user_id, 0)
-    if q_idx != current_progress:
-        await callback_query.answer("⏭ Ответ не принят: ты либо уже прошёл этот вопрос, либо ещё не дошёл до него")
-        return
-
-    question = questions[q_idx]
-    if selected in question["options"]:
-        is_correct, comment = question["options"][selected]
-        await callback_query.answer()
-        await bot.send_message(user_id, comment)
-
-        if is_correct:
-            quiz_progress[user_id] = q_idx + 1
-            await asyncio.sleep(1)
-            if quiz_progress[user_id] < len(questions):
-                await send_quiz_sequence(user_id)
-            else:
-                await bot.send_message(user_id, "🎉 Ты прошёл все вопросы! 🎁")
-                user_states[user_id] += 1
-                await send_next_quest(user_id)
-        else:
-            await bot.send_message(user_id, "❌ Нет, не так! Попробуй ещё раз.")
-    else:
-        await callback_query.answer("🤔 Неизвестный ответ")
-
 quiz_progress = {}
 
 async def send_quiz_sequence(user_id):
