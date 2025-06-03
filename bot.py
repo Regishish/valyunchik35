@@ -74,10 +74,15 @@ async def handle_user_response(message: types.Message):
     "🍽️ Я за любой твой выбор, особенно если мы идём туда вместе ❤️"
 ]
 
-  if state < len(compliments):
-    await message.reply(f"✅ Задание выполнено!\n{compliments[state]}")
-            
+  @dp.message_handler(content_types=types.ContentType.ANY)
+async def handle_user_response(message: types.Message):
+    if message.from_user.id in USER_IDS:
+        state = user_states.get(message.from_user.id, 0)
+        if state < len(QUESTS):
+            await message.reply(f"✅ Задание выполнено!\n{compliments[state]}")
+            user_states[message.from_user.id] += 1
             await send_next_quest(message.from_user.id)
+
 
 async def send_quiz_sequence(user_id):
     q_idx = quiz_progress.get(user_id, 0)
