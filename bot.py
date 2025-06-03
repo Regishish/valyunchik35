@@ -260,9 +260,10 @@ async def handle_ready(callback_query: CallbackQuery):
         await bot.send_message(user_id, "🎉 Всё выполнено! Поздравляю! 🎈")
         user_states[user_id] += 1
         await send_next_quest(user_id)
+if is_correct:
+    print("Все верно!")
 else:
-    await bot.send_message(user_id, "❌ Нет, не так! Попробуй ещё раз.")
-
+    print("Попробуй ещё раз.")
 quiz_progress = {}
 async def send_quiz_sequence(user_id):
     q_idx = quiz_progress.get(user_id, 0)
