@@ -140,7 +140,6 @@ questions = [
 },
 ]
 
-user_states = {}
 quiz_progress = {}
 
 @dp.message_handler(commands=['start'])
@@ -163,7 +162,7 @@ async def send_next_quest(user_id):
             user_id,
             quest_text + "\n\n📸 Сделал задание? Жми «Готово», если всё выполнено!",
             reply_markup=markup
-        )
+    )
     elif index == len(QUESTS):
         await bot.send_message(user_id, "🎯 Теперь — мини-викторина 😊")
         quiz_progress[user_id] = 0
@@ -184,7 +183,6 @@ async def handle_ready(callback_query: CallbackQuery):
     user_states[user_id] += 1
     await send_next_quest(user_id)
 
-user_states = {}
 
     else:
         await bot.send_message(user_id, "🎉 Всё выполнено! Поздравляю! 🎈")
@@ -250,7 +248,6 @@ async def handle_quiz_answer(callback_query: types.CallbackQuery):
         
         question = questions[q_idx]
 
-    if selected in question["options"]:
         is_correct, comment = question["options"][selected]
         await callback_query.answer()
         await bot.send_message(user_id, comment)
