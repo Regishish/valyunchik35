@@ -185,38 +185,15 @@ async def handle_ready(callback_query: CallbackQuery):
     await send_next_quest(user_id)
 
 user_states = {}
-quiz_progress = {}
 
-async def send_next_quest(user_id):
-    index = user_states.get(user_id, 0)
-
-    if index < len(QUESTS):
-        quest_text = QUESTS[index]["text"]
-        markup = InlineKeyboardMarkup()
-        markup.add(InlineKeyboardButton("Готово ✅", callback_data="ready"))
-        await bot.send_message(
-            user_id,
-            quest_text + "\n\n📸 Сделал задание? Жми «Готово», если всё выполнено!",
-            reply_markup=markup
-      
-        await send_quiz_sequence(user_id)
     else:
         await bot.send_message(user_id, "🎉 Всё выполнено! Поздравляю! 🎈")
-
-@dp.callback_query_handler(lambda c: c.data == "ready")
-async def handle_ready(callback_query: CallbackQuery):
-    user_id = callback_query.from_user.id
-    index = user_states.get(user_id, 0)
-
-    await callback_query.answer("✅ Задание отмечено как выполненное!")
 
     if index < len(compliments):
         await bot.send_message(user_id, compliments[index])
 
     user_states[user_id] += 1
     await send_next_quest(user_id)
-
-quiz_progress = {}
 
 async def send_quiz_sequence(user_id):
     q_idx = quiz_progress.get(user_id, 0)
