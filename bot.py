@@ -243,13 +243,14 @@ async def handle_quiz_answer(callback_query: types.CallbackQuery):
         await bot.send_message(user_id, comment)
 
         if is_correct:
-            quiz_progress[user_id] = q_idx + 1
-                try:
-                    await bot.send_photo(chat_id=user_id, photo=InputFile(photo), caption=caption)
-                except Exception as e:
-                    logging.error(f"Ошибка при отправке фото: {e}")
-        await asyncio.sleep(3600)
-# ← вставить здесь (примерно строка 263)
+    quiz_progress[user_id] = q_idx + 1
+    await asyncio.sleep(1)
+    if quiz_progress[user_id] < len(questions):
+        await send_quiz_sequence(user_id)
+    else:
+        await bot.send_message(user_id, "🎉 Всё выполнено! Поздравляю! 🎈")
+        await handle_quiz_completion(user_id)
+
 async def send_hourly_compliments():
     from datetime import datetime
     import asyncio
