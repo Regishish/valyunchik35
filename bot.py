@@ -250,7 +250,8 @@ async def handle_ready(callback_query: CallbackQuery):
         await callback_query.answer()
         await bot.send_message(user_id, comment)
 
-        if is_correct:
+       if is_correct:
+    print(f"📍 Отправляем вопрос №{q_idx + 1} пользователю {user_id}")
     quiz_progress[user_id] = q_idx + 1
     await asyncio.sleep(1)
     if quiz_progress[user_id] < len(questions):
